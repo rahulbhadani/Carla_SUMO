@@ -1,97 +1,97 @@
-# TiEV-交通流注入联合仿真程序
+# TiEV - Traffic Flow Injection Co-simulation Program
 
-## 1 总览
+## 1 Overview
 
-​	为了提高无人驾驶仿真场景中背景交通流的真实性，本项目实现无人驾驶仿真平台CARLA与微观交通流仿真系统SUMO之间的联合仿真程序，将SUMO中的背景车流注入到CARLA场景中并进行同步仿真。
+​ In order to improve the authenticity of the background traffic flow in the driverless simulation scene, this project implements a joint simulation program between the driverless simulation platform CARLA and the microscopic traffic flow simulation system SUMO, and injects the background traffic flow in SUMO into the CARLA scene And perform synchronous simulation.
 
-## 2 基于间接控制车辆的交通流注入方法
 
-### 2.1 概述
+## 2  Traffic flow injection method based on indirect control of vehicles
 
-​	本节方法是项目创设初期提出的方法。由于联合仿真系统并不直接对仿真场景中的车辆进行控制，因此称之为间接控制车辆的注入方法。考虑到此类方法完全基于车辆客户端实现，因此支持的交通流注入规模较小。
+### 2.1 Overview
 
-### 2.2 效果展示
+​	The method in this section is the method proposed at the beginning of the project. Since the co-simulation system does not directly control the vehicle in the simulation scene, it is called an injection method for indirect control of the vehicle. Considering that this type of method is completely based on the vehicle client implementation, the supported traffic flow injection scale is small.
 
-![间接控制程序展示](images/TiEV/CARLA_Automatic.gif)
+### 2.2 Example result
 
-### 2.3 使用说明
+![result](images/TiEV/CARLA_Automatic.gif)
+
+### 2.3 Instructions for use
 
 ``` shell
-# 运行0.9.8版本的CARLA服务器程序，不在当前目录下
+# Run the 0.9.8 version of CARLA server program
 $ ./CarlaUE4.sh
-# 运行交通流服务器程序
+# Run traffic server program
 $ python SUMOServer/SUMO_Carla.py 
-# 运行背景车客户端，根据需要运行多个
+# Running background car client, according to need to run several
 $ python Co-Simulation/background_client.py 
 ```
 
 
 
-## 3 基于直接控制车辆的交通流注入方法
+## 3 Traffic flow injection method based on directly controlling vehicles
 
-### 3.1 概述
+### 3.1 Overview
 
-​	CARLA官方在2020年3月发布的CARLA 0.9.8版本中加入了对SUMO联合仿真的支持。官方实现方法的核心思想是不经由车辆客户端，而直接从仿真场景的层次定时控制场景内所有车辆。这种方法支持的交通流规模非常大（但也会受到服务器端性能限制），但不支持客户端层级的控制方法。
+​	​ CARLA officially added support for SUMO co-simulation in the version 0.9.8 of CARLA released in March 2020. The core idea of ​​the official implementation method is to control all vehicles in the scene directly from the level of the simulation scene without going through the vehicle client. The traffic flow scale supported by this method is very large (but also limited by server-side performance), but it does not support client-level control methods.
 
-### 3.2 效果展示
+### 3.2 Example
 
 ![](images/TiEV/Direct_Injection.gif)
 
-### 3.3 使用说明
+### 3.3 Instructions for use
 
 ``` shell
-# 运行0.9.8版本的CARLA服务器程序，不在当前目录下
+# Run the 0.9.8 version of CARLA server program, not in the current directory
 $ ./CarlaUE4.sh
-# Windows环境运行交通流注入程序
+# Windows environment runs the traffic flow injection program
 $ ./Co-Simulation/injection.bat
-# Linux环境运行交通流注入程序
 
 ```
 
 
 
-## 4 基于混合控制车辆的交通流注入方法
+## 4 Traffic flow injection method based on hybrid control vehicles
 
-### 4.1 概述
+### 4.1 Overview
 
-​	此处的混合控制方法实质上融合了直接控制方法的车辆控制方法，以及间接控制方法的双端交互框架，以此来实现客户端层面的控制支持，以模拟某些客户端所需控制的典型场景。
+​ The hybrid control method here essentially integrates the vehicle control method of the direct control method and the two-terminal interaction framework of the indirect control method to realize the control support at the client level to simulate the control required by some clients Typical scenario.
 
-### 4.2 效果展示
+### 4.2 Result
 
-​	此处展示的是嵌入混合控制框架的手动控制车辆控制前方背景车流避让的情形。
+​	Shown here is a manual control vehicle embedded in a hybrid control frame to avoid the background traffic in front of it.
 
 ![](images/TiEV/Mixed_Injection.gif)
 
-​	目前，混合控制方法中受交通流服务器直接控制的背景车客户端还存在不稳定的问题，并且由于这类车辆还会被交通流服务器视为受CARLA控制的车辆，因此会在车辆的同一位置自动生成重复车辆，如下图所示。
+​	Currently, the background car client directly controlled by the traffic flow server in the hybrid control method still has the problem of instability, and because this type of vehicle is also regarded by the traffic flow server as a car controlled by CARLA, it will be in the same vehicle. The location automatically generates duplicate vehicles, as shown in the figure below.
 
 ![](images\TiEV\Hybrid_Coupling.png)
 
-​	因此，这一问题还需要后续进行优化和解决。
+​ Therefore, this problem needs to be optimized and resolved.
 
-### 4.3 使用说明
+### 4.3 Instructions for use
 
 ``` shell
-# 运行0.9.8版本的CARLA服务器程序，不在当前目录下
+# Run the 0.9.8 version of CARLA server program, not in the current directory
 $ ./CarlaUE4.sh
-# Windows环境运行交通流服务器（基于直接方法的注入程序构建）
+# Windows environment to run the traffic flow server (based on the direct method of injection program construction)
 $ ./Co-Simulation/injection.bat
-# 运行受交通流服务器直接控制的背景车客户端
+#Run the background car client directly controlled by the traffic flow server
 $ python Co-Simulation/client_main.py
-# 运行嵌入交互框架的手动控制客户端
+# Manual operation of embedded control client interaction framework
 $ python Co-Simulation/client_main.py --is-manual=True
-# 手动控制的客户端按V键请求前方车辆避让
+# Manual control client requests Press V escape ahead of the vehicle
 ```
 
 
 
-## 5 其他
+## 5 Other
 
-### 5.1 根据OpenDrive路网文件自动生成SUMO仿真文件
+### 5.1 Automatically generate SUMO simulation files based on OpenDrive road network files
 
-​	我们构建了输入OpenDrive文件、输出.sumocfg、.trip.xml等仿真文件的脚本程序，程序具体的构建可见`SUMOServer/generate_simulation.sh`文件。这一脚本程序目前仅能在Unix环境下运行，后续可将其重写为.bat格式的Windows脚本文件。
+​	We built script programs that input OpenDrive files and output simulation files such as .sumocfg, .trip.xml, etc. The program specifically builds visible SUMOServer/generate_simulation.shfiles. This script program can only be run under Unix environment at present, and it can be rewritten into a Windows script file in .bat format later.
 
-​	然而，目前这一部分存在的问题是自动生成的旅程文件`.trip.xml`在实际的仿真过程中往往不能覆盖场景中全部的道路。对于这一问题，从`randomTrips.py`官方文档[randomTrips.py](https://sumo.dlr.de/docs/Tools/Trip.html)中找到了相关的说法：
+​ However, the current problem in this part is that the automatically generated journey file `.trip.xml` often cannot cover all the roads in the scene during the actual simulation process. Regarding this issue, I found the relevant statement from the randomTrips.pyofficial document `randomTrips.py` : [randomTrips.py](https://sumo.dlr.de/docs/Tools/Trip.html)
 
 > This task is performed by the router. If the network is not fully connected some of the trips may be discarded.
 
-​	因此，这一部分还需要后续进一步的测试。
+​ Therefore, this part needs further testing.
